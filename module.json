@@ -1,0 +1,31 @@
+{
+  "id": "victory-keybinds",
+  "title": "Victory Keybinds",
+  "description": "A typing target for programmable peripherals: Stream Decks, keyboard macro keys, gaming mice. One bound key focuses a small widget, the device types a UUID or keyword, and the widget fires it. Macros, items, actor sheets, journals, sidebar tabs.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "Victor S. (DatJavaClass)"
+    }
+  ],
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12.343",
+    "maximum": "13"
+  },
+  "esmodules": [
+    "scripts/keybinds.js"
+  ],
+  "styles": [
+    "styles/keybinds.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "manifest": "https://github.com/DatJavaClass/VictoryKeybinds/releases/latest/download/module.json",
+  "download": "https://github.com/DatJavaClass/VictoryKeybinds/releases/download/v1.0.0/victory-keybinds-1.0.0.zip"
+}
