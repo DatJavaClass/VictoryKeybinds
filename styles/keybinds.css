@@ -1,0 +1,23 @@
+/* Floating bound input widget, dark and translucent. */
+#vkb-widget { position: fixed; top: 120px; left: 120px; z-index: 100; width: 360px; background: rgba(20, 20, 20, 0.82); border: 1px solid #00ffcc; border-radius: 6px; box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6); font-family: 'Signika', sans-serif; color: #e0e0e0; backdrop-filter: blur(2px); user-select: none; }
+#vkb-widget.vkb-focused { border-color: #ffaa00; box-shadow: 0 4px 22px rgba(255, 170, 0, 0.35); }
+
+/* Header: drag handle, title, badge, close */
+#vkb-widget .vkb-head { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: rgba(0, 0, 0, 0.35); border-bottom: 1px solid rgba(0, 255, 204, 0.3); border-radius: 6px 6px 0 0; cursor: move; }
+#vkb-widget .vkb-title { font-size: 0.82em; font-weight: bold; color: #00ffcc; text-transform: uppercase; letter-spacing: 0.08em; }
+#vkb-widget .vkb-badge { display: none; padding: 1px 6px; font-size: 0.7em; letter-spacing: 0.05em; color: #ffaa00; background: rgba(255, 170, 0, 0.15); border-radius: 3px; }
+#vkb-widget.vkb-debug .vkb-badge { display: inline; }
+#vkb-widget .vkb-close { margin-left: auto; width: auto; height: auto; padding: 0 4px; line-height: 1; background: transparent; border: none; box-shadow: none; color: #888; font-size: 1.1em; cursor: pointer; }
+#vkb-widget .vkb-close:hover { color: #ff6666; }
+
+/* Body: input, echo, hint */
+#vkb-widget .vkb-body { padding: 8px 10px 10px; }
+#vkb-widget .vkb-input { width: 100%; height: auto; padding: 6px 8px; box-sizing: border-box; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.85em; background: #0e0e0e !important; color: #00ffcc !important; border: 1px solid #333 !important; border-radius: 3px; outline: none; }
+#vkb-widget .vkb-input:focus { border-color: #ffaa00 !important; background: #161616 !important; box-shadow: none; }
+#vkb-widget .vkb-echo { margin-top: 8px; min-height: 22px; max-height: 22px; overflow-y: auto; padding: 4px 6px; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.78em; line-height: 1.4; color: #888; background: rgba(0, 0, 0, 0.25); border-radius: 3px; }
+#vkb-widget.vkb-debug .vkb-echo { max-height: 110px; }
+#vkb-widget .vkb-row { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#vkb-widget .vkb-ok { color: #00ffcc; }
+#vkb-widget .vkb-miss { color: #ff6666; }
+#vkb-widget .vkb-info { color: #888; font-style: italic; }
+#vkb-widget .vkb-hint { margin-top: 6px; font-size: 0.7em; letter-spacing: 0.03em; color: #555; text-align: right; }
