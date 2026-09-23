@@ -1,3 +1,5 @@
+DatJavaClass here, I am terrible at writing readme files, great at talking people through things, bad a putting pen to paper or finger to keyboard on how to. So yes, I did have an LLM write this readme. So it could be coherent. So it could be understood. So you could just maybe get an idea of what I build here. IF the fact that a readme is coherent offends you? I am sorry. If not, I hope what I made is useful and I genuinely hope it helps you have fun in your game. Roll on my friends, Roll on.
+
 # Victory Keybinds
 
 I run my table off an Elgato Stream Deck. One key opens the loot search, another fires the initiative macro, a third flips the sidebar to combat. Every one of those keys does the same two things: it presses a key, then it types a string. That is the whole trick, and Victory Keybinds is the half of it that lives inside Foundry.

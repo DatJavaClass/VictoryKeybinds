@@ -2,7 +2,7 @@
   "id": "victory-keybinds",
   "title": "Victory Keybinds",
   "description": "A typing target for programmable peripherals: Stream Decks, keyboard macro keys, gaming mice. One bound key focuses a small widget, the device types a UUID or keyword, and the widget fires it. Macros, items, actor sheets, journals, sidebar tabs.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "authors": [
     {
       "name": "Victor S. (DatJavaClass)"
