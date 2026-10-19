@@ -1,5 +1,6 @@
 /* Bound input widget: focus, idle fire, resolve, run. */
-const MODULE_ID = 'victory-keybinds', WIDGET_ID = 'vkb-widget';
+const MODULE_ID = 'victory-keybinds'; /* module id */
+const WIDGET_ID = 'vkb-widget'; /* root element id */
 const L = (k, data) => data ? game.i18n.format(`VKB.${k}`, data) : game.i18n.localize(`VKB.${k}`);
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const setting = (k) => game.settings.get(MODULE_ID, k);
@@ -13,16 +14,16 @@ const history = [];
 const focusBinding = () => game.keybindings.get(MODULE_ID, 'focus')[0];
 const keyLabel = () => {
   const b = focusBinding();
-  if (!b) return L('Widget.Unbound');
+  if (!b) return L('Widget.Unbound'); // in: binding, out: unbound text
   try { return (globalThis.KeybindingsConfig ?? foundry.applications.sidebar.apps.ControlsConfig).humanizeBinding(b); } catch { return b.key; } // v12 then v13
 };
 
 /* Echo row: debug keeps five lines, else one. */
 function echo(message, kind = 'info') {
-  if (!echoEl) return;
+  if (!echoEl) return; // in: message, out: skips if closed
   const stamp = new Date().toLocaleTimeString([], { hour12: false });
   history.push(`<div class="vkb-row vkb-${kind}">[${stamp}] ${esc(message)}</div>`);
-  while (history.length > (setting('debug') ? 5 : 1)) history.shift();
+  while (history.length > (setting('debug') ? 5 : 1)) history.shift(); // in: over cap, out: at cap
   echoEl.innerHTML = history.join(''); echoEl.scrollTop = echoEl.scrollHeight;
   DBG(kind, message);
 }
@@ -38,9 +39,9 @@ const createActor = async (type, label) => {
 const KEYWORDS = {
   inventory: async () => {
     const actor = canvas.tokens.controlled[0]?.actor;
-    if (!actor) return { ok: false, message: L('Echo.NoToken') };
+    if (!actor) return { ok: false, message: L('Echo.NoToken') }; // in: token, out: no token result
     const hits = actor.items.filter((i) => i.name?.toLowerCase().includes('inventory'));
-    if (!hits.length) return { ok: false, message: L('Echo.NoInventory', { actor: actor.name }) };
+    if (!hits.length) return { ok: false, message: L('Echo.NoInventory', { actor: actor.name }) }; // in: hits, out: none found result
     hits[0].sheet.render(true);
     return { ok: true, message: L(hits.length > 1 ? 'Echo.OpenedMany' : 'Echo.Opened', { name: hits[0].name, actor: actor.name, n: hits.length }) };
   },
@@ -49,22 +50,22 @@ const KEYWORDS = {
 };
 
 function jumpTab(name) {
-  if (!name) return { ok: false, message: L('Echo.TabMissing') };
+  if (!name) return { ok: false, message: L('Echo.TabMissing') }; // in: name, out: missing result
   const names = Object.keys(ui.sidebar?.tabs ?? {}), hit = names.find((t) => t.toLowerCase() === name); // exact match only
-  if (!hit) return { ok: false, message: L(names.length ? 'Echo.TabUnknown' : 'Echo.TabNone', { name }) };
-  try { ui.sidebar.activateTab ? ui.sidebar.activateTab(hit) : ui.sidebar.changeTab(hit, 'primary'); return { ok: true, message: L('Echo.TabOpened', { name: hit }) }; } // v12 then v13
+  if (!hit) return { ok: false, message: L(names.length ? 'Echo.TabUnknown' : 'Echo.TabNone', { name }) }; // in: hit, out: unknown result
+  try { ui.sidebar.activateTab ? ui.sidebar.activateTab(hit) : ui.sidebar.changeTab(hit, 'primary'); return { ok: true, message: L('Echo.TabOpened', { name: hit }) }; } // in: tab id, out: opened; v12 then v13
   catch (e) { fail(e, hit); return { ok: false, message: L('Echo.TabError') }; }
 }
 
 async function resolve(raw) {
   const input = raw.trim();
-  if (!input) return null;
-  if (input.startsWith('=')) return lookup(input.slice(1), 'Actor', 'actor');
-  if (input.startsWith('<')) return lookup(input.slice(1), 'JournalEntry', 'journal');
-  if (input.startsWith('>')) return kw(jumpTab(input.slice(1).trim().toLowerCase()));
+  if (!input) return null; // in: text, out: null if blank
+  if (input.startsWith('=')) return lookup(input.slice(1), 'Actor', 'actor'); // in: = sigil, out: actor lookup
+  if (input.startsWith('<')) return lookup(input.slice(1), 'JournalEntry', 'journal'); // in: < sigil, out: journal lookup
+  if (input.startsWith('>')) return kw(jumpTab(input.slice(1).trim().toLowerCase())); // in: > sigil, out: tab jump
   const handler = KEYWORDS[input] ?? KEYWORDS[input.toLowerCase()]; // exact then lowercase
-  if (handler) { DBG('keyword', input); return kw(await handler()); }
-  if (input.includes('.')) { const doc = await uuid(input); return ['Macro', 'Item'].includes(doc?.documentName) ? { doc, kind: doc.documentName.toLowerCase() } : null; }
+  if (handler) { DBG('keyword', input); return kw(await handler()); } // in: keyword, out: keyword result
+  if (input.includes('.')) { const doc = await uuid(input); return ['Macro', 'Item'].includes(doc?.documentName) ? { doc, kind: doc.documentName.toLowerCase() } : null; } // in: dotted id, out: macro or item
   const macro = game.macros.get(input); // bare world macro id
   return macro ? { doc: macro, kind: 'macro' } : null;
 }
@@ -73,34 +74,34 @@ async function resolve(raw) {
 async function fire(text) {
   clearTimeout(idleTimer); idleTimer = null;
   const raw = text ?? inputEl?.value ?? '';
-  if (text === undefined && inputEl) inputEl.value = '';
-  if (!raw.trim()) return echo(L('Echo.Empty'));
+  if (text === undefined && inputEl) inputEl.value = ''; // in: typed text, out: input cleared
+  if (!raw.trim()) return echo(L('Echo.Empty')); // in: raw, out: empty echo
   DBG('fire', raw);
   const t = await resolve(raw);
-  if (!t) return echo(L('Echo.NotFound', { text: raw }), 'miss');
-  if (t.kind === 'keyword') return echo(`${L('Tag.keyword')} ${t.result.message}`, t.result.ok ? 'ok' : 'miss');
+  if (!t) return echo(L('Echo.NotFound', { text: raw }), 'miss'); // in: target, out: miss echo
+  if (t.kind === 'keyword') return echo(`${L('Tag.keyword')} ${t.result.message}`, t.result.ok ? 'ok' : 'miss'); // in: keyword, out: result echo
   const { doc, kind } = t;
   echo(`${L(`Tag.${kind}`)} ${doc.name}`, 'ok');
-  try { if (kind === 'macro') await doc.execute(); else if (kind === 'item') await doc.use(); else doc.sheet.render(true); }
+  try { if (kind === 'macro') await doc.execute(); else if (kind === 'item') await doc.use(); else doc.sheet.render(true); } // in: kind, out: run or sheet
   catch (e) { fail(e, doc.name); echo(L('Echo.Error', { name: doc.name }), 'miss'); }
 }
 
 /* Input: idle fire, Enter fires, Escape clears. */
-const schedule = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => { idleTimer = null; if (inputEl?.value.trim()) fire(); }, setting('idleMs')); };
+const schedule = () => { clearTimeout(idleTimer); idleTimer = setTimeout(() => { idleTimer = null; if (inputEl?.value.trim()) fire(); }, setting('idleMs')); }; // idle timer, fire text
 function onKey(ev) {
-  if (ev.code === focusBinding()?.key) { ev.preventDefault(); inputEl.select(); } // binding while focused
-  else if (ev.key === 'Enter') { ev.preventDefault(); fire(); }
-  else if (ev.key === 'Escape') { ev.preventDefault(); clearTimeout(idleTimer); idleTimer = null; inputEl.value = ''; inputEl.blur(); echo(L('Echo.Cleared')); }
+  if (ev.code === focusBinding()?.key) { ev.preventDefault(); inputEl.select(); } // in: focus key, out: select text
+  else if (ev.key === 'Enter') { ev.preventDefault(); fire(); } // in: Enter, out: fire
+  else if (ev.key === 'Escape') { ev.preventDefault(); clearTimeout(idleTimer); idleTimer = null; inputEl.value = ''; inputEl.blur(); echo(L('Echo.Cleared')); } // in: Escape, out: input cleared
 }
 
 /* Drag by header, clamped to the window. */
 function dragStart(ev) {
-  if (ev.target.closest('.vkb-close')) return;
+  if (ev.target.closest('.vkb-close')) return; // in: mousedown, out: skips close button
   const r = root.getBoundingClientRect();
   drag = { x: ev.clientX - r.left, y: ev.clientY - r.top }; ev.preventDefault();
 }
 function dragMove(ev) {
-  if (!drag) return;
+  if (!drag) return; // in: move, out: skips if idle
   root.style.left = `${Math.max(0, Math.min(window.innerWidth - 40, ev.clientX - drag.x))}px`;
   root.style.top = `${Math.max(0, Math.min(window.innerHeight - 20, ev.clientY - drag.y))}px`;
 }
@@ -108,7 +109,7 @@ function dragMove(ev) {
 /* Widget lifecycle on document.body. */
 const applyDebug = () => root?.classList.toggle('vkb-debug', setting('debug'));
 function open() {
-  if (!game.user.isGM) return ui.notifications.error(L('GmOnly'));
+  if (!game.user.isGM) return ui.notifications.error(L('GmOnly')); // in: user, out: GM only error
   close(); document.getElementById(WIDGET_ID)?.remove(); // stale node after reload
   const key = keyLabel();
   root = document.createElement('div'); root.id = WIDGET_ID;
@@ -132,13 +133,13 @@ function open() {
   DBG('open, key', key);
 }
 function close() {
-  if (!root) return;
+  if (!root) return; // in: widget, out: skips if closed
   ctl.abort(); clearTimeout(idleTimer); root.remove();
   root = inputEl = echoEl = ctl = idleTimer = drag = null; history.length = 0;
   DBG('closed');
 }
-const toggle = () => (root ? close() : open());
-const focus = () => { if (!root) open(); inputEl?.focus(); inputEl?.select(); DBG('focus claimed'); };
+const toggle = () => (root ? close() : open()); // open state decides
+const focus = () => { if (!root) open(); inputEl?.focus(); inputEl?.select(); DBG('focus claimed'); }; // in: closed, out: opened
 
 Hooks.once('init', () => {
   game.settings.register(MODULE_ID, 'idleMs', { name: 'VKB.Settings.IdleMs.Name', hint: 'VKB.Settings.IdleMs.Hint', scope: 'client', config: true, type: Number, default: 150 });
@@ -151,5 +152,5 @@ Hooks.once('init', () => {
 /* API: open(), close(), toggle(), fire(text). */
 Hooks.once('ready', () => {
   game.modules.get(MODULE_ID).api = { open, close, toggle, fire };
-  if (game.user.isGM && setting('autoOpen')) open();
+  if (game.user.isGM && setting('autoOpen')) open(); // GM with autoOpen opens widget
 });
